@@ -1,0 +1,32 @@
+{
+  "name": "compile-bot",
+  "version": "1.0.0",
+  "description": "Compile bot for discord, using glot.io/api",
+  "main": "null",
+  "repository": "https://www.github.com/Navrin/compile-bot",
+  "author": "Navrin Thomas",
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha",
+    "test:watch": "mocha-typescript-watch"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.0.3",
+    "@types/mocha": "^2.2.41",
+    "chai": "^4.1.1",
+    "mocha": "^3.5.0",
+    "mocha-typescript": "^1.1.7",
+    "source-map-support": "^0.4.15",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.6.0",
+    "tslint-config-airbnb": "^5.2.1",
+    "tslint-eslint-rules": "^4.1.1"
+  },
+  "dependencies": {
+    "@types/bluebird": "^3.5.8",
+    "@types/node": "^8.0.20",
+    "bluebird": "^3.5.0",
+    "simple-discordjs": "^1.5.11",
+    "typescript": "^2.4.2"
+  }
+}
