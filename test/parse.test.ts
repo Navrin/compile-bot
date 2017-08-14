@@ -44,7 +44,7 @@ class Parsing {
     @test('long form with codeblock and language highlighting should return correctly')
     longFormWithHighlighting() {
         const code = parseCode(`${this.language} \`\`\`${this.language}
-        ${this.code}
+            ${this.code}
         \`\`\``);
 
         expect(code).to.eq(this.response);
