@@ -6,20 +6,24 @@ Bluebird.config({
 
 global.Promise = Bluebird;
 
+// START
+
 import Commander from 'simple-discordjs';
 import * as Discord from 'discord.js';
+import { discordToken } from './tokens';
+import * as commands from './commands';
 
 const client = new Discord.Client();
 
-const glotToken = process.env.COMPILE_BOT_GLOT_TOKEN;
-const discordToken = process.env.COMPILE_BOT_DISCORD_TOKEN;
-
-if (glotToken == null || discordToken == null) {
-    throw new Error('Tokens not found!');
-}
-
 client.login(discordToken);
 
-const commander = new Commander('e!', client, {
-     botType: 'guildonly',
+client.on('ready', async () => {
+    console.log('Hello! Ready to compile!');
+    console.log(await client.generateInvite());
 });
+
+const _ = new Commander('e!', client, {
+    botType: 'guildonly',
+})
+    .defineCommand(commands.run)
+    .listen();

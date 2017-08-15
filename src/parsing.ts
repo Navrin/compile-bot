@@ -1,34 +1,46 @@
-import * as program from 'commander';
+const minimist = require('minimist-string');
 
-interface Options {
+const CODE_AND_LANG_ONLY = /(\w+|`{1,3}[\s\S]+`{1,3})(\s+(.+|`{1,3}[\s\S]+`{1,3}))?$/;
+const TRIPLE_CODE_BLOCK = /```\w+[\s\S]+```/gm;
+const TRIPLE_LANGUAGE_POSITIONS = /```(\w+ ?)/m;
+
+export interface Options {
     language: string;
-    shell?: string;
-    file?: string;
-    code: string;
+    shell?:   string;
+    file?:    string;
+    code:     string;
+    input?:   string;
+    version?: string;
 }
 
-program
-    .option('-l, --language [lang]', 'Specify what language you want to use')
-    .option('-s, --shell [cmd]', 'The command line command to run')
-    .option('-f, --file [file]', 'The file name for the code to be evaled')
-    .arguments('[code...]');
+function parseArguments(message: string): Options | undefined {
+    const parsed = minimist(message, {
+        alias: {
+            f: 'file',
+            s: 'shell',
+            l: 'language',
+            v: 'version',
+            i: 'input',
+        },
+    });
 
-function parseArguments(message: string): Options {
-    program
-        .action(function (this: program.CommanderStatic, body) {
-            this.body = body.join('');
-        });
+    const evalMessage = message.match(CODE_AND_LANG_ONLY);
 
-    const { code, language } = parseCode(program.body);
+    if (evalMessage == null) {
+        return;
+    }
+    const { code, language } = parseCode(evalMessage[0]);
+
 
     return {
         code,
-        language,
-        file: program.file,
-        shell: program.shell,
+        input: parsed.input,
+        language: language || parsed.language,
+        version: parsed.version,
+        file: parsed.file,
+        shell: parsed.shell,
     };
 }
-
 
 /**
  * Resprents a response, seperated by language and code contents.
@@ -40,8 +52,6 @@ interface ParsedResponse {
     code: string;
 }
 
-const TRIPLE_CODE_BLOCK = /```\w+[\s\S]+```/gm;
-const TRIPLE_LANGUAGE_POSITIONS = /```[\w ]+$/m;
 
 function parseJustTripleBLock(message: string): ParsedResponse {
     const langMatches = message.match(TRIPLE_LANGUAGE_POSITIONS);
@@ -52,7 +62,7 @@ function parseJustTripleBLock(message: string): ParsedResponse {
     const language = langMatches[0].slice(3);
 
     const uncleanCode = message.replace(TRIPLE_LANGUAGE_POSITIONS, '');
-    const code = uncleanCode.slice(3, uncleanCode.length - 3).trim();
+    const code = uncleanCode.slice(0, uncleanCode.length - 3).trim();
 
     return {
         code,
@@ -68,12 +78,11 @@ function parseCodeBlock(code: string): string {
     const isTriple = code.startsWith('```');
     if (isTriple) {
         const codeWithoutLang = code.replace(TRIPLE_LANGUAGE_POSITIONS, '');
-        return codeWithoutLang.slice(3, codeWithoutLang.length - 3);
+        return codeWithoutLang.slice(0, codeWithoutLang.length - 3);
     }
 
     return code.slice(1, code.length - 1);
 }
-
 
 /**
  * Converts a string form into an object to be sent to the api.
@@ -97,7 +106,7 @@ function parseCode(message: string): ParsedResponse {
         return parseJustTripleBLock(message);
     } else {
         const [language, ...rest] = sep;
-        const code = rest.join(' ');
+        const code = rest.join(' ').trim();
 
         if (code.startsWith('`')) {
             const cleaned = parseCodeBlock(code);
@@ -114,4 +123,4 @@ function parseCode(message: string): ParsedResponse {
     }
 }
 
-export { parseCode };
+export { parseCode, parseArguments };
