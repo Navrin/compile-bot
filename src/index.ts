@@ -21,5 +21,5 @@ if (glotToken == null || discordToken == null) {
 client.login(discordToken);
 
 const commander = new Commander('e!', client, {
-    botType: 'guildonly',
+     botType: 'guildonly',
 });

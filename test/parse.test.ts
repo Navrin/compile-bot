@@ -1,7 +1,7 @@
 import { suite, test } from 'mocha-typescript';
 import { expect } from 'chai';
 
-import { parseCode } from '../src/glot';
+import { parseCode } from '../src/parsing';
 
 @suite('Code Parsing ->')
 class Parsing {
@@ -22,14 +22,14 @@ class Parsing {
     short() {
         const code = parseCode(`${this.language} ${this.code}`);
 
-        expect(code).to.eq(this.response);
+        expect(code).to.deep.eq(this.response);
     }
 
     @test('short code with codeblock should return correctly')
     shortCode() {
         const code = parseCode(`${this.language} \`${this.code}\``);
 
-        expect(code).to.eq(this.response);
+        expect(code).to.deep.eq(this.response);
     }
 
     @test('long form with codeblock should return correctly')
@@ -38,7 +38,7 @@ class Parsing {
             ${this.code}
         \`\`\` `);
 
-        expect(code).to.eq(this.response);
+        expect(code).to.deep.eq(this.response);
     }
 
     @test('long form with codeblock and language highlighting should return correctly')
@@ -47,7 +47,16 @@ class Parsing {
             ${this.code}
         \`\`\``);
 
-        expect(code).to.eq(this.response);
+        expect(code).to.deep.eq(this.response);
+    }
+
+    @test('only codeblock with implict language should return correctly')
+    onlyCodeBlock() {
+        const code = parseCode(`\`\`\`${this.language}
+            ${this.code}
+        \`\`\``);
+
+        expect(code).to.deep.eq(this.response);
     }
 }
 

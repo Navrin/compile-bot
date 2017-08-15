@@ -24,8 +24,10 @@
   },
   "dependencies": {
     "@types/bluebird": "^3.5.8",
+    "@types/commander": "^2.9.1",
     "@types/node": "^8.0.20",
     "bluebird": "^3.5.0",
+    "commander": "^2.11.0",
     "simple-discordjs": "^1.5.11",
     "typescript": "^2.4.2"
   }
