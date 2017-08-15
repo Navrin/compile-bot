@@ -141,6 +141,8 @@ async function runCode(payload: Options): Promise<RunResponse> {
 
     const json = await response.json();
 
+    console.log(json);
+    
     return {
         tooLong: json.stderr.length > 1000 || json.stdout.length > 1000,
         body: json,
@@ -152,5 +154,6 @@ export {
     findLanguage,
     alises,
     createSnippet,
+    getLanguages,
     runCode,
 };

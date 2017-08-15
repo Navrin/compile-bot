@@ -67,16 +67,24 @@ class Parsing {
         \`\`\`
         `);
 
+        if (code === undefined) {
+            return;
+        }
+
         return expect(code.code).to.not.be.empty;
     }
 
     @test('it should pass this')
     moreTest() {
-        const code = parseCode(`javascript 
+        const code = parseCode(`javascript
         \`\`\`javascript
         console.log('hi');
         asdjksadkjasdjlk
         \`\`\``);
+
+        if (code === undefined) {
+            return;
+        }
 
         expect(code.language).to.eq('javascript');
         return expect(code.code).to.be.ok;

@@ -26,4 +26,6 @@ const _ = new Commander('e!', client, {
     botType: 'guildonly',
 })
     .defineCommand(commands.run)
+    .defineCommand(commands.list)
+    .generateHelp()
     .listen();

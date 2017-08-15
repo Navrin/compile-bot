@@ -19,7 +19,6 @@ class Glot {
     }
 
     @test('it can create snippets')
-    @skip
     async snippet() {
         const snippet = await glot.createSnippet('Hello World (automated test!)');
 
@@ -27,7 +26,6 @@ class Glot {
     }
 
     @test('it can run code!')
-    @skip
     async code() {
         const payload = {
             language: 'javascript',

@@ -1,8 +1,10 @@
 const minimist = require('minimist-string');
 
 const CODE_AND_LANG_ONLY = /(\w+|`{1,3}[\s\S]+`{1,3})(\s+(.+|`{1,3}[\s\S]+`{1,3}))?$/;
-const TRIPLE_CODE_BLOCK = /```\w+[\s\S]+```/gm;
-const TRIPLE_LANGUAGE_POSITIONS = /```(\w+ ?)/m;
+const LANG_POSITION = /(^[a-z]+)|```([a-z]+)$/im;
+const CODE_BLOCK = /`{1,3}([\s\S]+)`{1,3}/m;
+const TRIPLE_BLOCK_CLEAN = /\w*\s*```(\w*)/m;
+
 
 export interface Options {
     language: string;
@@ -29,7 +31,12 @@ function parseArguments(message: string): Options | undefined {
     if (evalMessage == null) {
         return;
     }
-    const { code, language } = parseCode(evalMessage[0]);
+    const result = parseCode(evalMessage[0]);
+    if (result == null) {
+        return;
+    }
+
+    const { code, language } = result;
 
 
     return {
@@ -42,46 +49,9 @@ function parseArguments(message: string): Options | undefined {
     };
 }
 
-/**
- * Resprents a response, seperated by language and code contents.
- *
- * @interface ParseResponse
- */
 interface ParsedResponse {
     language: string;
     code: string;
-}
-
-
-function parseJustTripleBLock(message: string): ParsedResponse {
-    const langMatches = message.match(TRIPLE_LANGUAGE_POSITIONS);
-    if (langMatches == null) {
-        throw new SyntaxError('No language was given!');
-    }
-
-    const language = langMatches[0].slice(3);
-
-    const uncleanCode = message.replace(TRIPLE_LANGUAGE_POSITIONS, '');
-    const code = uncleanCode.slice(0, uncleanCode.length - 3).trim();
-
-    return {
-        code,
-        language,
-    };
-}
-
-/**
- * Transforms a code block like ```lang code``` or `code` to code
- * @param code
- */
-function parseCodeBlock(code: string): string {
-    const isTriple = code.startsWith('```');
-    if (isTriple) {
-        const codeWithoutLang = code.replace(TRIPLE_LANGUAGE_POSITIONS, '');
-        return codeWithoutLang.slice(0, codeWithoutLang.length - 3);
-    }
-
-    return code.slice(1, code.length - 1);
 }
 
 /**
@@ -99,28 +69,38 @@ function parseCodeBlock(code: string): string {
  * @param {string} message
  * @returns {(ParsedResponse | undefined)}
  */
-function parseCode(message: string): ParsedResponse {
-    const sep = message.trim().split(' ');
-    if (sep[0].startsWith('```')) {
-        // command is e!run ```lang ```
-        return parseJustTripleBLock(message);
-    } else {
-        const [language, ...rest] = sep;
-        const code = rest.join(' ').trim();
+function parseCode(_message: string): ParsedResponse | undefined {
+    const message = _message.trim();
+    const langMatches = message.match(LANG_POSITION);
+    if (langMatches == null) {
+        return;
+    }
+    const language = langMatches[1] || langMatches[2];
 
-        if (code.startsWith('`')) {
-            const cleaned = parseCodeBlock(code);
+    if (message.includes('`')) {
+        if (message.endsWith('```')) {
+            const match = TRIPLE_BLOCK_CLEAN.exec(message);
+            if (match == null) {
+                return;
+            }
+
+            const semiClean = message.replace(match[0], '');
             return {
                 language,
-                code: cleaned.trim(),
+                code: semiClean.slice(0, semiClean.length - 3).trim(),
             };
         }
 
         return {
             language,
-            code: code.trim(),
+            code: message.slice(language.length + /* space */ 1 + 1, message.length - 1),
         };
     }
+
+    return {
+        language,
+        code: message.split(' ').slice(1).join(' '),
+    };
 }
 
 export { parseCode, parseArguments };

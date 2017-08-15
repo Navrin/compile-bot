@@ -71,6 +71,7 @@ async function run(
         message.channel.send(result);
         return;
     } catch (e) {
+        console.log(e.stack);
         message.channel
             .send(`Error evaling the code! ${e}`)
             .then((msg: Discord.Message) => msg.delete(15000));

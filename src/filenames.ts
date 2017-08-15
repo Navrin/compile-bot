@@ -11,6 +11,7 @@ const filenames: {
     cplusplus: 'main.cpp',
     ocaml: 'main.ml',
     golang: 'main.go',
+    go: 'main.go',
     perl: 'main.pl',
     bash: 'main.sh',
     rust: 'main.rs',
