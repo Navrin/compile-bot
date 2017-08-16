@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "es6",                          
+    "module": "commonjs",                     
+    "lib": ["es2015", "es7", "es2017.object", "dom"],
+    "jsx": "preserve",
+    "outDir": "./dist",                     
+    "strict": true,                     
+    "experimentalDecorators": true,          
+    "emitDecoratorMetadata": true            
+  },
+  "include": [
+      "./src"
+  ]
+}

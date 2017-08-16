@@ -9,30 +9,42 @@ const OUTPUT_EMOJI  = '📤';
 const TADA_EMOJI    = '🎉';
 const TIMER_EMOJI   = '⌛';
 
+/**
+ * Transforms a user code input into a parsed interface,
+ * then sends the code and options to glot.io's api,
+ * and returns whatever output is contained within stdout.
+ *
+ * @param {Discord.Message} message
+ * @param {*} _blank - unneeded param
+ * @param {*} _stillblank - unneeded
+ * @param {Discord.Client} client
+ * @returns {Promise<void>}
+ */
 async function run(
     message: Discord.Message,
     _blank: any,
     _stillblank: any,
     client: Discord.Client,
 ): Promise<void> {
+    // removes the e!run part
     const [_, ...contents] = message.content.split(' ');
     const code = contents.join(' ');
 
-    message.react(TIMER_EMOJI);
+    await message.react(TIMER_EMOJI);
     const payload = parsing.parseArguments(code);
     if (payload === undefined) {
+        message.react(ERROR_EMOJI);
         message.channel
-        .send('Message was badly formed. Cannot parse.')
-        .then((msg: Discord.Message) => msg.delete(15000));
+            .send('Message was badly formed. Cannot parse.');
         return;
     }
 
     const language = await glot.findLanguage(payload.language);
 
     if (language === undefined) {
+        message.react(ERROR_EMOJI);
         message.channel
-            .send(`${payload.language} was not found as a valid language.`)
-            .then((msg: Discord.Message) => msg.delete(15000));
+            .send(`${payload.language} was not found as a valid language.`);
         return;
     }
 
@@ -40,7 +52,8 @@ async function run(
 
     try {
         const embed = new Discord.RichEmbed();
-        embed.setAuthor('compile-bot', client.user.avatarURL);
+        embed.setAuthor('', client.user.avatarURL);
+
         const evaled = await glot.runCode(payload);
         if (evaled.body.error) {
             embed.setTitle(`${WARNING_EMOJI} Glot repoted an error!`);
@@ -71,9 +84,8 @@ async function run(
         message.channel.send(result);
         return;
     } catch (e) {
-        console.log(e.stack);
         message.channel
-            .send(`Error evaling the code! ${e}`)
+            .send(`Error evaling the code! \`\`\` ${e}\`\`\``)
             .then((msg: Discord.Message) => msg.delete(15000));
     }
 }

@@ -7,6 +7,9 @@
   "author": "Navrin Thomas",
   "license": "MIT",
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev:start": "ts-node ./src/index.ts",
+    "start": "yarn run build && node ./dist/index.js",
     "test": "mocha",
     "test:watch": "mocha-typescript-watch"
   },

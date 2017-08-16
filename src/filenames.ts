@@ -1,17 +1,21 @@
+/**
+ * Apparently filenames are not implicit, and must be explicitally stated.
+ * These filenames where extracted from a ripgrep of the site's container testing files.
+ */
 const filenames: {
     [key: string]: string,
 } = {
     elm: 'main.elm',
     ats: 'main.dats',
     groovy: 'main.groovy',
-    typescript: 'main.ts',
+    typescript: 'main.ts', // 🙌
     c: 'main.c',
     assembly: 'main.asm',
     erlang: 'main.erl',
     cplusplus: 'main.cpp',
     ocaml: 'main.ml',
-    golang: 'main.go',
     go: 'main.go',
+    golang: 'main.go',
     perl: 'main.pl',
     bash: 'main.sh',
     rust: 'main.rs',
@@ -32,7 +36,7 @@ const filenames: {
     elixir: 'main.ex',
     swift: 'main.swift',
     javascript: 'main.js',
-    coffeescript: 'main.coffee',
+    coffeescript: 'main.coffee', // people still use this?
     kotlin: 'main.kt',
     scala: 'main.scala',
     mercury: 'main.m',

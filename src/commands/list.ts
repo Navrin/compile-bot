@@ -2,23 +2,28 @@ import { CommandFunction, CommandDefinition } from 'simple-discordjs';
 import * as Discord from 'discord.js';
 import * as glot from '../glot';
 import { stripIndents } from 'common-tags';
-import * as _ from 'lodash';
+import { zip } from 'lodash';
 
-async function list(
-    message: Discord.Message,
-    _blank: any,
-    _stillblank: any,
-    client: Discord.Client,
-): Promise<void> {
+/**
+ * Creates a list of possible language choices.
+ *
+ * @param {Discord.Message} message
+ * @returns {Promise<void>}
+ */
+async function list(message: Discord.Message): Promise<void> {
     const langList = await glot.getLanguages();
-    const firstList = langList.slice(0, Math.floor(langList.length / 2));
-    const secondList = langList.slice(Math.floor(langList.length / 2));
+    const firstList = langList.slice(0, Math.floor(langList.length / 2)); // first half
+    const secondList = langList.slice(Math.floor(langList.length / 2)); // second half
+    const largest = langList.reduce((pv, cv) => (pv.length > cv.length) ? pv : cv).length; // largest lang for spaces
+
     const output = stripIndents`
         All possible languages are listed below:
         \`\`\`
             ${
-                _.zip(firstList, secondList)
-                    .map(([l1, l2]) => `${l1}${' '.repeat(15 - l1.length)}${l2}\n`).join('')
+                zip(firstList, secondList)
+                    .map(([l1, l2]) =>
+                        `${l1}${' '.repeat((largest + 2) - l1.length)}${l2}\n`)
+                    .join('')
              }
         \`\`\`
     `;

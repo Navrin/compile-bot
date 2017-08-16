@@ -47,7 +47,7 @@ alises.set(['sw'], 'swift');
 alises.set(['ts'], 'typescript');
 alises.set(['golang'], 'go');
 
-let languageCache: string[] = [];
+const languageCache: string[] = [];
 /**
  * Searches up all possible language options and caches the result.
  *
@@ -62,7 +62,7 @@ async function getLanguages(): Promise<string[]> {
     const json = await request.json();
 
     const names = json.map((entry: { name: string }) => entry.name);
-    languageCache = names;
+    languageCache.push(...names);
     return languageCache;
 }
 
@@ -110,16 +110,47 @@ async function getVersion(lang: string): Promise<string[] | undefined> {
 }
 
 interface GlotResponse {
+    /**
+     * stdout response from glot.io (probably what the user wants)
+     *
+     * @type {string}
+     * @memberof GlotResponse
+     */
     stdout: string;
+    /**
+     * stderr result from glot.io
+     *
+     * @type {string}
+     * @memberof GlotResponse
+     */
     stderr: string;
+    /**
+     * Returns (Program exited with a non zero status) if there was an error during execution.
+     *
+     * @type {string}
+     * @memberof GlotResponse
+     */
     error:  string;
 }
 
+
 interface RunResponse {
+    /**
+     * Signifies if the response may be too long for chat. (create a snippet instead)
+     *
+     * @type {boolean}
+     * @memberof RunResponse
+     */
     tooLong: boolean;
     body: GlotResponse;
 }
 
+/**
+ * Sends a payload to glot and returns the api response in object form.
+ *
+ * @param {Options} payload
+ * @returns {Promise<RunResponse>}
+ */
 async function runCode(payload: Options): Promise<RunResponse> {
     const headers = new Headers();
     headers.set('Content-type', 'application/json');
@@ -141,8 +172,6 @@ async function runCode(payload: Options): Promise<RunResponse> {
 
     const json = await response.json();
 
-    console.log(json);
-    
     return {
         tooLong: json.stderr.length > 1000 || json.stdout.length > 1000,
         body: json,
