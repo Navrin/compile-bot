@@ -56,15 +56,7 @@ export interface Options {
 }
 
 function parseArguments(message: string): Options | undefined {
-    const parsed = minimist(message, {
-        alias: {
-            f: 'file',
-            s: 'shell',
-            l: 'language',
-            v: 'version',
-            i: 'input',
-        },
-    });
+    const parsed = minimist(message);
 
     const evalMessage = message.match(CODE_AND_LANG_ONLY);
 
