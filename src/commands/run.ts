@@ -96,10 +96,6 @@ const runCommand: CommandDefinition = {
         parameters: '{{code}}',
         names: ['run', 'eval'],
     },
-    description: {
-        message: 'Runs your code in a docker instance hosted by glot.io',
-        example: '{{{prefix}}}run javascript `console.log(30 + 40)`',
-    },
 };
 
 export { runCommand };

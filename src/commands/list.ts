@@ -36,10 +36,6 @@ const listCommand: CommandDefinition = {
         action: list,
         names: ['list', 'langs', 'alllangs'],
     },
-    description: {
-        message: 'Lists all possible languages the glot.io api can use.',
-        example: '{{{prefix}}}list',
-    },
 };
 
 export { listCommand };

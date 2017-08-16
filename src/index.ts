@@ -33,5 +33,5 @@ const _ = new Commander('e!', client, {
 })
     .defineCommand(commands.run)
     .defineCommand(commands.list)
-    .generateHelp()
+    .defineCommand(commands.help)
     .listen();
