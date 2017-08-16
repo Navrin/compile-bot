@@ -12,7 +12,7 @@ This project is a bot made in typescript + discord.js to compile user given code
 * Run code in a safe docker sandbox, and output directly in chat.
 * Prevents overly large outputs by snippeting outputs > 1000 characters.
 * Allows for stdin inputs with the `--input "hello code"` flag
-* Allows for custom shell commands to be run, like `--shell "echo "hi"; node main.js" 
+* Allows for custom shell commands to be run, like `--shell "echo "hi"; node main.js"`
 * Allows for custom filenames to be given with the `--file "test.js"` flag.
 * Supports a large amount of languages, listed below.
 
