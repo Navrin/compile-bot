@@ -42,6 +42,8 @@ async function run(
     const language = await glot.findLanguage(payload.language);
 
     if (language === undefined) {
+        const langTrimmed =
+            `${payload.language.slice(0, 20)}${(payload.language.length > 20) ? '...' : ''}`;
         message.react(ERROR_EMOJI);
         message.channel
             .send(`${payload.language} was not found as a valid language.`);
@@ -57,7 +59,7 @@ async function run(
         const evaled = await glot.runCode(payload);
         if (evaled.body.error) {
             embed.setTitle(`${WARNING_EMOJI} Glot repoted an error!`);
-            embed.setDescription(`\`\`\`proc: ${evaled.body.error}\nstderr: ${evaled.body.stderr}\`\`\``);
+            embed.setDescription(`\`\`\`proc: ${evaled.body.error}\nstderr: ${evaled.body.stderr}\nstdout: ${evaled.body.stdout}\`\`\``);
 
             message.channel.send({ embed });
             return;
