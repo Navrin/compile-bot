@@ -39,6 +39,10 @@ async function run(
         return;
     }
 
+    return await runCode(payload, message);
+}
+
+async function runCode(payload: parsing.Options, message: Discord.Message) {
     const language = await glot.findLanguage(payload.language);
 
     if (language === undefined) {
@@ -53,15 +57,12 @@ async function run(
     payload.language = language;
 
     try {
-        const embed = new Discord.RichEmbed();
-        embed.setAuthor('', client.user.avatarURL);
-
         const evaled = await glot.runCode(payload);
         if (evaled.body.error) {
-            embed.setTitle(`${WARNING_EMOJI} Glot repoted an error!`);
-            embed.setDescription(`\`\`\`proc: ${evaled.body.error}\nstderr: ${evaled.body.stderr}\nstdout: ${evaled.body.stdout}\`\`\``);
+            const output = `${WARNING_EMOJI} Glot repoted an error!\n`
+                + `\`\`\`proc: ${evaled.body.error}\nstderr: ${evaled.body.stderr}\nstdout: ${evaled.body.stdout}\`\`\``;
 
-            message.channel.send({ embed });
+            message.channel.send(output);
             return;
         }
 
@@ -70,17 +71,17 @@ async function run(
                 `stdout: ${evaled.body.stdout}\nstderr: ${evaled.body.stderr}`,
             );
 
-            embed.setTitle('Output too long!');
-            embed.setDescription('Output was above 1000 characters, so the contents has been sent to a glot snippet instead');
-            embed.addField('Snippet', snippet);
+            const output = 'Output too long!\n'
+                + 'Output was above 1000 characters, so the contents has been sent to a glot snippet instead'
+                + `link: ${snippet}`;
 
-            message.channel.send({ embed });
+            message.channel.send(output);
             return;
         }
 
         const result =
-             '```' + `${OUTPUT_EMOJI} stdout: \n` + (evaled.body.stdout || 'null') + '```' +
-             '```' + `${ERROR_EMOJI} stderr: \n` + (evaled.body.stderr || 'null') + '```';
+            '```' + `${OUTPUT_EMOJI} stdout: \n` + (evaled.body.stdout || 'null') + '```' +
+            '```' + `${ERROR_EMOJI} stderr: \n` + (evaled.body.stderr || 'null') + '```';
 
 
         message.channel.send(result);
@@ -100,4 +101,35 @@ const runCommand: CommandDefinition = {
     },
 };
 
-export { runCommand };
+/**
+ * // TODO: make this more elegant
+ * Pretty hacky, but allows for e!lang to be used instead of e!run language
+ * @param list
+ * @param prefix
+ */
+function createLanguageCommands(list: string[], prefix: string) {
+    return list.map(lang => ({
+        command: {
+            async action(message: Discord.Message): Promise<void> {
+                const contents = message.content.split(' ');
+                const first = contents[0];
+                const language = first.slice(prefix.length);
+
+                await message.react(TIMER_EMOJI);
+                const payload = parsing.parseArguments(`${language} ${contents.slice(1).join(' ')}`);
+
+                if (payload === undefined) {
+                    message.react(ERROR_EMOJI);
+                    message.channel
+                        .send('Message was badly formed. Cannot parse.');
+                    return;
+                }
+
+                return await runCode(payload, message);
+            },
+            names: [lang],
+        },
+    }));
+}
+
+export { runCommand, runCode, createLanguageCommands };
