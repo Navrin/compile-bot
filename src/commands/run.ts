@@ -58,6 +58,13 @@ async function runCode(payload: parsing.Options, message: Discord.Message) {
 
     try {
         const evaled = await glot.runCode(payload);
+
+        if (evaled.body.stderr == null
+            || evaled.body.stdout == null) {
+            message.channel.send(`Code timed out! (we haven't solved the halting problem, sorry)`);
+            return;
+        }
+
         if (evaled.body.error) {
             const output = `${WARNING_EMOJI} Glot repoted an error!\n`
                 + `\`\`\`proc: ${evaled.body.error}\nstderr: ${evaled.body.stderr}\nstdout: ${evaled.body.stdout}\`\`\``;
@@ -72,7 +79,7 @@ async function runCode(payload: parsing.Options, message: Discord.Message) {
             );
 
             const output = 'Output too long!\n'
-                + 'Output was above 1000 characters, so the contents has been sent to a glot snippet instead'
+                + 'Output was longer than 1000 characters, so the contents has been sent to a glot snippet instead\n'
                 + `link: ${snippet}`;
 
             message.channel.send(output);

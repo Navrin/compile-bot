@@ -116,14 +116,14 @@ interface GlotResponse {
      * @type {string}
      * @memberof GlotResponse
      */
-    stdout: string;
+    stdout?: string;
     /**
      * stderr result from glot.io
      *
      * @type {string}
      * @memberof GlotResponse
      */
-    stderr: string;
+    stderr?: string;
     /**
      * Returns (Program exited with a non zero status) if there was an error during execution.
      *
@@ -170,10 +170,14 @@ async function runCode(payload: Options): Promise<RunResponse> {
             }),
         });
 
-    const json = await response.json();
+    const json: GlotResponse = await response.json();
+    const tooLong: boolean =
+        (typeof json.stderr === 'string' && typeof json.stdout === 'string')
+            ? json.stderr.length > 1000  || json.stdout.length > 1000
+            : false;
 
     return {
-        tooLong: json.stderr.length > 1000 || json.stdout.length > 1000,
+        tooLong,
         body: json,
     };
 }
