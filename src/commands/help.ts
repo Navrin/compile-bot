@@ -27,11 +27,15 @@ e!list
 `;
 
 async function help(message: Discord.Message) {
-    message.channel.send('Help has been sent to your PMs!')
-        .then((msg: Discord.Message) => msg.delete(4000));
+    // Maybe put channel send into a try catch block too?
+    const msg = <Discord.Message>await message.channel.send('Help has been sent to your PMs!');
+    msg.delete(4000);
 
-    message.author.send(helpMessage)
-        .catch(e => message.channel.send('Your PMs are disabled! (sorry!)'));
+    try {
+        message.author.send(helpMessage);
+    } catch (e) {
+        await message.channel.send('Your PMs are disabled (sorry!)');
+    }
 }
 
 const helpCommand: CommandDefinition = {

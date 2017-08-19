@@ -72,7 +72,9 @@ async function getLanguages(): Promise<string[]> {
  * @param {string} lang
  * @returns {Promise<string>}
  */
-async function findLanguage(lang: string): Promise<string | undefined> {
+async function findLanguage(_lang: string): Promise<string | undefined> {
+    const lang = _lang.toLowerCase();
+
     if (languageCache.length === 0) {
         await getLanguages();
     }
@@ -130,7 +132,14 @@ interface GlotResponse {
      * @type {string}
      * @memberof GlotResponse
      */
-    error:  string;
+    error?: string;
+    /**
+     * Glot.io response on a non-successful compliation attempt (timeout etc)
+     *
+     * @type {string}
+     * @memberof GlotResponse
+     */
+    message?: string;
 }
 
 
