@@ -1,7 +1,7 @@
-import { glotToken } from './tokens';
-import fetch, { Headers } from 'node-fetch';
-import filenames from './filenames';
-import { Options } from './parsing';
+import { glotToken } from "./tokens";
+import fetch, { Headers } from "node-fetch";
+import filenames from "./filenames";
+import { Options } from "./parsing";
 
 /**
  * Creates a snippet in glot.io and returns the URL.
@@ -11,19 +11,21 @@ import { Options } from './parsing';
  */
 async function createSnippet(body: string): Promise<string> {
     const headers = new Headers();
-    headers.set('Content-type', 'application/json');
+    headers.set("Content-type", "application/json");
 
-    const request = await fetch('https://snippets.glot.io/snippets', {
+    const request = await fetch("https://snippets.glot.io/snippets", {
         headers,
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({
-            language: 'plaintext',
-            title: 'Logs',
+            language: "plaintext",
+            title: "Logs",
             public: false,
-            files: [{
-                name: 'logs',
-                content: body,
-            }],
+            files: [
+                {
+                    name: "logs",
+                    content: body,
+                },
+            ],
         }),
     });
 
@@ -33,19 +35,19 @@ async function createSnippet(body: string): Promise<string> {
 }
 
 const alises: Map<string[], string> = new Map();
-alises.set(['asm'], 'assembly');
-alises.set(['cs', 'coffee'], 'coffeescript');
-alises.set(['clj'], 'clojure');
-alises.set(['c#'], 'csharp');
-alises.set(['f#'], 'fsharp');
-alises.set(['hs'], 'haskell');
-alises.set(['js', 'jscript'], 'javascript');
-alises.set(['py', 'py3'], 'python');
-alises.set(['rb'], 'ruby');
-alises.set(['rs'], 'rust');
-alises.set(['sw'], 'swift');
-alises.set(['ts'], 'typescript');
-alises.set(['golang'], 'go');
+alises.set(["asm"], "assembly");
+alises.set(["cs", "coffee"], "coffeescript");
+alises.set(["clj"], "clojure");
+alises.set(["c#"], "csharp");
+alises.set(["f#"], "fsharp");
+alises.set(["hs"], "haskell");
+alises.set(["js", "jscript"], "javascript");
+alises.set(["py", "py3"], "python");
+alises.set(["rb"], "ruby");
+alises.set(["rs"], "rust");
+alises.set(["sw"], "swift");
+alises.set(["ts"], "typescript");
+alises.set(["golang"], "go");
 
 const languageCache: string[] = [];
 /**
@@ -58,7 +60,7 @@ async function getLanguages(): Promise<string[]> {
         return languageCache;
     }
 
-    const request = await fetch('https://run.glot.io/languages');
+    const request = await fetch("https://run.glot.io/languages");
     const json = await request.json();
 
     const names = json.map((entry: { name: string }) => entry.name);
@@ -142,7 +144,6 @@ interface GlotResponse {
     message?: string;
 }
 
-
 interface RunResponse {
     /**
      * Signifies if the response may be too long for chat. (create a snippet instead)
@@ -162,27 +163,32 @@ interface RunResponse {
  */
 async function runCode(payload: Options): Promise<RunResponse> {
     const headers = new Headers();
-    headers.set('Content-type', 'application/json');
-    headers.set('Authorization', `Token ${glotToken}`);
+    headers.set("Content-type", "application/json");
+    headers.set("Authorization", `Token ${glotToken}`);
 
-    const response =
-        await fetch(`https://run.glot.io/languages/${payload.language}/${payload.version || 'latest'}`, {
+    const response = await fetch(
+        `https://run.glot.io/languages/${payload.language}/${payload.version ||
+            "latest"}`,
+        {
             headers,
-            method: 'POST',
+            method: "POST",
             body: JSON.stringify({
-                files: [{
-                    name: payload.file || filenames[payload.language],
-                    content: payload.code,
-                }],
+                files: [
+                    {
+                        name: payload.file || filenames[payload.language],
+                        content: payload.code,
+                    },
+                ],
                 command: payload.shell,
                 stdin: payload.input,
             }),
-        });
+        },
+    );
 
     const json: GlotResponse = await response.json();
     const tooLong: boolean =
-        (typeof json.stderr === 'string' && typeof json.stdout === 'string')
-            ? json.stderr.length > 1000  || json.stdout.length > 1000
+        typeof json.stderr === "string" && typeof json.stdout === "string"
+            ? json.stderr.length > 1000 || json.stdout.length > 1000
             : false;
 
     return {
