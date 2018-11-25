@@ -1,13 +1,16 @@
-const minimist = require('minimist-string');
+import parser, { ParseResult, CODE_LANG } from "./parser";
+import * as P from "parsimmon";
+
+const minimist = require("minimist-string");
 
 /**
  * Spooky regex.
  * Be scared! 👻
  */
-const CODE_AND_LANG_ONLY = /(\w+|`{1,3}[\s\S]+`{1,3})(\s+(.+|`{1,3}[\s\S]+`{1,3}))?$/;
-const LANG_POSITION = /(^[a-z]+)|```([a-z]+)$/im;
-const CODE_BLOCK = /`{1,3}([\s\S]+)`{1,3}/m;
-const TRIPLE_BLOCK_CLEAN = /\w*\s*```(\w*)/m;
+const CODE_AND_LANG_ONLY = /(\w+|`{1,3}[\s\S]+`{1,3})(\s+(.+|`{1,3}[\s\S]+`{1,3}))?$/gm;
+const LANG_POSITION = /(^[a-z]+)|```([a-z]+)$/gim;
+const CODE_BLOCK = /`{1,3}([\s\S]+)`{1,3}/gm;
+const TRIPLE_BLOCK_CLEAN = /\w*\s*```(\w*)/gm;
 
 export interface Options {
     /**
@@ -23,28 +26,28 @@ export interface Options {
      * @type {string}
      * @memberof Options
      */
-    shell?:   string;
+    shell?: string;
     /**
      * Filename, default is main.langextention
      *
      * @type {string}
      * @memberof Options
      */
-    file?:    string;
+    file?: string;
     /**
      * The actual code to be sent to glot.io and executed
      *
      * @type {string}
      * @memberof Options
      */
-    code:     string;
+    code: string;
     /**
      * Optional stdin argument, to mock fake input events
      *
      * @type {string}
      * @memberof Options
      */
-    input?:   string;
+    input?: string;
     /**
      * Specify what version of a language the user wants to run their code in.
      * By default, use the latest version.
@@ -53,31 +56,45 @@ export interface Options {
      * @memberof Options
      */
     version?: string;
+    /**
+     * Setting to run the code in the implicit evaluation contexts
+     * defined
+     */
+    eval?: string | boolean;
 }
 
-function parseArguments(message: string): Options | undefined {
-    const parsed = minimist(message);
-
-    const evalMessage = message.match(CODE_AND_LANG_ONLY);
-
-    if (evalMessage == null) {
-        return;
-    }
-    const result = parseCode(evalMessage[0]);
-    if (result == null) {
-        return;
+function disambiguateParseType(message: string): ParseResult {
+    if (!message.includes("`")) {
+        return parser.SingleFlagless.parse(message);
     }
 
-    const { code, language } = result;
+    return message.endsWith("```")
+        ? parser.Triple.parse(message.trim())
+        : parser.Single.parse(message.trim());
+}
 
+function parseArguments(message: string): Options | P.Failure {
+    const parsed: ParseResult = disambiguateParseType(message);
+
+    if (!parsed.status) {
+        return parsed;
+    }
+
+    const search = CODE_LANG.exec(message);
+    const lang = search ? search[1] : parsed.value.language;
+
+    const rawFlags = parsed.value.flags ? parsed.value.flags.trim() : "";
+
+    const flags = minimist(rawFlags);
 
     return {
-        code,
-        input: parsed.input,
-        language: language || parsed.language,
-        version: parsed.version,
-        file: parsed.file,
-        shell: parsed.shell,
+        code: parsed.value.code,
+        input: flags.input,
+        language: lang || flags.language,
+        version: flags.version,
+        file: flags.file,
+        shell: flags.shell,
+        eval: flags.eval,
     };
 }
 
@@ -109,14 +126,14 @@ function parseCode(_message: string): ParsedResponse | undefined {
     }
     const language = langMatches[1] || langMatches[2];
 
-    if (message.includes('`')) {
-        if (message.endsWith('```')) {
+    if (message.includes("`")) {
+        if (message.endsWith("```")) {
             const match = TRIPLE_BLOCK_CLEAN.exec(message);
             if (match == null) {
                 return;
             }
             // removes the first 3 backticks and the language name.
-            const semiClean = message.replace(match[0], '');
+            const semiClean = message.replace(match[0], "");
             return {
                 language,
                 // removes the last 3 backticks and trims newlines.
@@ -127,13 +144,19 @@ function parseCode(_message: string): ParsedResponse | undefined {
         return {
             language,
             /// removes the first backtick and the last backtick + a space
-            code: message.slice(language.length + /* space */ 1 + 1, message.length - 1),
+            code: message.slice(
+                language.length + /* space */ 1 + 1,
+                message.length - 1,
+            ),
         };
     }
 
     return {
         language,
-        code: message.split(' ').slice(1).join(' '),
+        code: message
+            .split(" ")
+            .slice(1)
+            .join(" "),
     };
 }
 
