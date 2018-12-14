@@ -9,6 +9,13 @@ Bluebird.config({
 
 global.Promise = Bluebird;
 
+process.on("unhandledRejection", error => {
+    console.log(
+        "unhandled rejection in promise: ",
+        JSON.stringify(error, undefined, 4),
+    );
+});
+
 // START
 
 import Commander from "simple-discordjs";
