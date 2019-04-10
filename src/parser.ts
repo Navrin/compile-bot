@@ -1,7 +1,8 @@
 import * as P from "parsimmon";
+import { loggit } from ".";
 
 const CODE_REGEX = /```([a-z]*)\n*([\s\S]*?)\n*```/m;
-const SINGLE_CODE_REGEX = /`([\S\s]+)`/m;
+const SINGLE_CODE_REGEX = /`([\S\s]+)`/im;
 export const CODE_LANG = /```([a-z]+){1}\n[\s\S]+/im;
 
 export type ParserResult = { language: string; flags?: string; code: string };
@@ -9,15 +10,22 @@ export type ParseResult = P.Result<ParserResult>;
 
 const parser = P.createLanguage({
     Triple(r) {
+        loggit("parsing with triple");
+
         return P.seqObj<ParserResult>(
-            ["language", r.Lang],
-            ["flags", r.Flags],
-            P.optWhitespace.or(P.newline),
-            ["code", r.Code],
+            ["language", r.Lang.desc("langs")],
+            ["flags", r.Flags.desc("flags")],
+            P.optWhitespace
+                .desc("maybewhite")
+                .or(P.newline.desc("newline"))
+                .desc("newline ph"),
+            ["code", r.Code.desc("THE CODE")],
         );
     },
 
     Single(r) {
+        loggit("parsing with single");
+
         return P.seqObj<ParserResult>(
             ["language", r.SingleLang],
             P.whitespace,

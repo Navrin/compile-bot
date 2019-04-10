@@ -1,5 +1,6 @@
 import parser, { ParseResult, CODE_LANG } from "./parser";
 import * as P from "parsimmon";
+import { loggit } from ".";
 
 const minimist = require("minimist-string");
 
@@ -68,7 +69,7 @@ function disambiguateParseType(message: string): ParseResult {
         return parser.SingleFlagless.parse(message);
     }
 
-    return message.endsWith("```")
+    return message.trim().endsWith("```")
         ? parser.Triple.parse(message.trim())
         : parser.Single.parse(message.trim());
 }
@@ -87,7 +88,7 @@ function parseArguments(message: string): Options | P.Failure {
 
     const flags = minimist(rawFlags);
 
-    return {
+    const payload = {
         code: parsed.value.code,
         input: flags.input,
         language: lang || flags.language,
@@ -96,6 +97,10 @@ function parseArguments(message: string): Options | P.Failure {
         shell: flags.shell,
         eval: flags.eval,
     };
+
+    loggit(payload);
+
+    return payload;
 }
 
 interface ParsedResponse {

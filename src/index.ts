@@ -9,12 +9,18 @@ Bluebird.config({
 
 global.Promise = Bluebird;
 
-process.on("unhandledRejection", error => {
-    console.log(
-        "unhandled rejection in promise: ",
-        JSON.stringify(error, undefined, 4),
-    );
-});
+// process.on("unhandledRejection", error => {
+//     console.log(
+//         "unhandled rejection in promise: ",
+//         JSON.stringify(error, undefined, 4),
+//     );
+// });
+
+export function loggit(...msg: any) {
+    if ((process.env.ENV || "development").toLowerCase() === "development") {
+        console.log(...msg);
+    }
+}
 
 // START
 
